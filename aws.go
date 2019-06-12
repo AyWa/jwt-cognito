@@ -25,6 +25,8 @@ type awsWellKnowKey struct {
 	Use string `json:"use"`
 }
 
+// later we might abstract fetchKeys with a simple interface in order to test easily without
+// fetch real aws key
 func (aws *Auth) fetchKeys() ([]*awsWellKnowKey, error) {
 	url := fmt.Sprintf("https://cognito-idp.%s.amazonaws.com/%s/.well-known/jwks.json", aws.region, aws.userPoolID)
 	resp, err := http.Get(url)
@@ -35,7 +37,7 @@ func (aws *Auth) fetchKeys() ([]*awsWellKnowKey, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to read aws jwks body")
 	}
-	var keys *awsWellKnowKeys
+	keys := &awsWellKnowKeys{}
 	err = json.Unmarshal(body, keys)
 	if err != nil {
 		return nil, errors.Wrap(err, "fail to unmarshal aws jwks body")
@@ -47,12 +49,13 @@ func (aws *Auth) fetchKeys() ([]*awsWellKnowKey, error) {
 type IDTokenPayload struct {
 	Sub           string
 	Aud           string
+	EventId       string
 	TokenUse      string
 	Iss           string
 	EmailVerified bool
 	Email         string
 	Username      string
-	GivenName     string
+	PreferName    string
 	AuthTime      time.Duration
 	Exp           time.Duration
 	Iat           time.Duration
@@ -61,10 +64,13 @@ type IDTokenPayload struct {
 // AccessTokenPayload ...
 type AccessTokenPayload struct {
 	Sub      string
+	EventId  string
 	Scope    string
 	TokenUse string
 	Username string
 	Iss      string
+	Jti      string
+	ClientId string
 	AuthTime time.Duration
 	Exp      time.Duration
 	Iat      time.Duration
