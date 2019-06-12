@@ -5,6 +5,7 @@ import (
 	"math/big"
 	"reflect"
 	"testing"
+	"time"
 )
 
 // later might be better to move that in testdata folder
@@ -275,6 +276,121 @@ func TestAuth_ValidateToken(t *testing.T) {
 			}
 			if !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Auth.ValidateToken() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAuth_ValidateAccessToken(t *testing.T) {
+	iat, _ := time.Parse(time.RFC3339, "1987-10-04T09:49:19.000Z")
+	exp, _ := time.Parse(time.RFC3339, "2272-12-15T02:49:20.000Z")
+	type fields struct {
+		awsKeys    map[string]*awsWellKnowKey
+		region     string
+		userPoolID string
+	}
+	type args struct {
+		accessToken string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *AccessTokenPayload
+		wantErr bool
+	}{
+		{
+			"should succeed: valid access token",
+			fields{awsKeys: testValidawsKeys},
+			args{validTestAccessToken},
+			&AccessTokenPayload{
+				Sub:      "3a9f2f3a-e659-41da-b116-0902d1f7d4ea",
+				EventID:  "503b9285-75fc-429f-96fe-be7d08129e3e",
+				TokenUse: "access",
+				Scope:    "aws.cognito.signin.user.admin",
+				Iss:      "https://ttt.com",
+				Jti:      "849850ea-c9fc-419e-b0e5-7eb46d9d65cc",
+				ClientID: "16p6m803hdmmvqs0bbvinfb9pt",
+				Username: "marc.ttt@gmail.com",
+				Exp:      exp,
+				Iat:      iat,
+				AuthTime: iat,
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			aws := &Auth{
+				awsKeys:    tt.fields.awsKeys,
+				region:     tt.fields.region,
+				userPoolID: tt.fields.userPoolID,
+			}
+			got, err := aws.ValidateAccessToken(tt.args.accessToken)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Auth.ValidateAccessToken() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Auth.ValidateAccessToken() = \n%v, \nwant \n%v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestAuth_ValidateIDToken(t *testing.T) {
+	iat, _ := time.Parse(time.RFC3339, "2019-06-12T11:35:59.000Z")
+	exp, _ := time.Parse(time.RFC3339, "2272-12-15T02:49:20.000Z")
+	type fields struct {
+		awsKeys    map[string]*awsWellKnowKey
+		region     string
+		userPoolID string
+	}
+	type args struct {
+		IDToken string
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		want    *IDTokenPayload
+		wantErr bool
+	}{
+		{
+			"should succeed: valid id token",
+			fields{awsKeys: testValidawsKeys},
+			args{validTestIDToken},
+			&IDTokenPayload{
+				Sub:           "3a9f2f3a-e659-41da-b116-0902d1f7d4ea",
+				Aud:           "16p6m803hdmmvqs0bbvinfb9pt",
+				EventID:       "503b9285-75fc-429f-96fe-be7d08129e3e",
+				TokenUse:      "id",
+				Iss:           "https://txt.com",
+				EmailVerified: true,
+				Email:         "marc.ttt@gmail.com",
+				Username:      "marc.ttt@gmail.com",
+				PreferName:    "marc",
+				Exp:           exp,
+				Iat:           iat,
+				AuthTime:      iat,
+			},
+			false,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			aws := &Auth{
+				awsKeys:    tt.fields.awsKeys,
+				region:     tt.fields.region,
+				userPoolID: tt.fields.userPoolID,
+			}
+			got, err := aws.ValidateIDToken(tt.args.IDToken)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("Auth.ValidateIDToken() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("Auth.ValidateIDToken() = \n%v, \nwant \n%v", got, tt.want)
 			}
 		})
 	}

@@ -47,31 +47,31 @@ func (aws *Auth) fetchKeys() ([]*awsWellKnowKey, error) {
 
 // IDTokenPayload ...
 type IDTokenPayload struct {
-	Sub           string
-	Aud           string
-	EventId       string
-	TokenUse      string
-	Iss           string
-	EmailVerified bool
-	Email         string
-	Username      string
-	PreferName    string
-	AuthTime      time.Duration
-	Exp           time.Duration
-	Iat           time.Duration
+	Sub           string    `mapstructure:"sub"`
+	Aud           string    `mapstructure:"aud"`
+	EventID       string    `mapstructure:"event_id"`
+	TokenUse      string    `mapstructure:"token_use"`
+	Iss           string    `mapstructure:"iss"`
+	EmailVerified bool      `mapstructure:"email_verified"`
+	Email         string    `mapstructure:"email"`
+	Username      string    `mapstructure:"cognito:username"`
+	PreferName    string    `mapstructure:"preferred_username"`
+	AuthTime      time.Time `mapstructure:"auth_time"`
+	Exp           time.Time `mapstructure:"exp"`
+	Iat           time.Time `mapstructure:"iat"`
 }
 
 // AccessTokenPayload ...
 type AccessTokenPayload struct {
-	Sub      string
-	EventId  string
-	Scope    string
-	TokenUse string
-	Username string
-	Iss      string
-	Jti      string
-	ClientId string
-	AuthTime time.Duration
-	Exp      time.Duration
-	Iat      time.Duration
+	Sub      string    `mapstructure:"sub"`
+	EventID  string    `mapstructure:"event_id"`
+	Scope    string    `mapstructure:"scope"`
+	TokenUse string    `mapstructure:"token_use"`
+	Username string    `mapstructure:"username"`
+	Iss      string    `mapstructure:"iss"`
+	Jti      string    `mapstructure:"jti"`
+	ClientID string    `mapstructure:"client_id"`
+	AuthTime time.Time `mapstructure:"auth_time"`
+	Exp      time.Time `mapstructure:"exp"`
+	Iat      time.Time `mapstructure:"iat"`
 }

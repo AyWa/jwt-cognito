@@ -6,6 +6,7 @@ import (
 	"errors"
 	"math/big"
 	"sync"
+	"time"
 
 	"crypto/rsa"
 
@@ -68,8 +69,11 @@ func (aws *Auth) ValidateAccessToken(accessToken string) (*AccessTokenPayload, e
 	if err != nil {
 		return nil, err
 	}
-	var values *AccessTokenPayload
-	mapstructure.Decode(rawValues, values)
+	convertTimeStamp(rawValues)
+	values := &AccessTokenPayload{}
+	if err := mapstructure.Decode(rawValues, values); err != nil {
+		return nil, err
+	}
 	return values, nil
 }
 
@@ -79,8 +83,11 @@ func (aws *Auth) ValidateIDToken(IDToken string) (*IDTokenPayload, error) {
 	if err != nil {
 		return nil, err
 	}
-	var values *IDTokenPayload
-	mapstructure.Decode(rawValues, values)
+	convertTimeStamp(rawValues)
+	values := &IDTokenPayload{}
+	if err := mapstructure.Decode(rawValues, values); err != nil {
+		return nil, err
+	}
 	return values, nil
 }
 
@@ -109,6 +116,32 @@ func (aws *Auth) getAwsKey(k string) (*awsWellKnowKey, error) {
 		return nil, errors.New("kid: " + k + " is not found")
 	}
 	return v, nil
+}
+
+// later need to move to mapstruct if possible
+func convertTimeStamp(raw map[string]interface{}) {
+	expTime := getTimeStamp(raw["exp"])
+	if expTime != nil {
+		raw["exp"] = expTime
+	}
+	iatTime := getTimeStamp(raw["iat"])
+	if iatTime != nil {
+		raw["iat"] = iatTime
+	}
+	authTime := getTimeStamp(raw["auth_time"])
+	if authTime != nil {
+		raw["auth_time"] = authTime
+	}
+}
+
+func getTimeStamp(raw interface{}) *time.Time {
+	i, ok := raw.(float64)
+	if !ok {
+		return nil
+	}
+	tm := time.Unix(int64(i), 0)
+	tm = tm.UTC()
+	return &tm
 }
 
 func getPublicKey(rawE, rawN string) (*rsa.PublicKey, error) {
