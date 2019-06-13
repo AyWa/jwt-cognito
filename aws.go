@@ -45,7 +45,7 @@ func (aws *Auth) fetchKeys() ([]*awsWellKnowKey, error) {
 	return keys.Keys, nil
 }
 
-// IDTokenPayload ...
+// IDTokenPayload structure containing the payload of an id token
 type IDTokenPayload struct {
 	Sub           string    `mapstructure:"sub"`
 	Aud           string    `mapstructure:"aud"`
@@ -61,7 +61,7 @@ type IDTokenPayload struct {
 	Iat           time.Time `mapstructure:"iat"`
 }
 
-// AccessTokenPayload ...
+// AccessTokenPayload structure containing the payload of an access token
 type AccessTokenPayload struct {
 	Sub      string    `mapstructure:"sub"`
 	EventID  string    `mapstructure:"event_id"`

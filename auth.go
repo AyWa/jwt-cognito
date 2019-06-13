@@ -14,7 +14,11 @@ import (
 	"github.com/mitchellh/mapstructure"
 )
 
-// Auth ...
+// Auth is the main structure that contains all the methods for
+// validate cognito JWT token.
+// Internally, it will fetch the aws public key for your account
+// see https://aws.amazon.com/premiumsupport/knowledge-center/decode-verify-cognito-json-token/
+// WARNING: It should not be instanciate directly! use New instead
 type Auth struct {
 	// The key will be the `kid`
 	awsKeys     map[string]*awsWellKnowKey
@@ -23,7 +27,9 @@ type Auth struct {
 	awsKeysLock sync.RWMutex
 }
 
-// New ...
+// New is a simple constructor of the main structure.
+// It needs the region and the userPoolID in order to validate correctly
+// the jwt token
 func New(region, userPoolID string) *Auth {
 	return &Auth{
 		region:     region,
@@ -32,7 +38,8 @@ func New(region, userPoolID string) *Auth {
 	}
 }
 
-// ValidateToken ...
+// ValidateToken is a generic method that validate a JWT token
+// and return the raw payload
 func (aws *Auth) ValidateToken(tokenString string) (map[string]interface{}, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		kid, ok := token.Header["kid"].(string)
@@ -63,7 +70,9 @@ func (aws *Auth) ValidateToken(tokenString string) (map[string]interface{}, erro
 	return claim, nil
 }
 
-// ValidateAccessToken accessToken
+// ValidateAccessToken accessToken is an helper to validate the accessToken
+// see https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-with-identity-providers.html
+// It is similar as ValidateToken but will return a real structure
 func (aws *Auth) ValidateAccessToken(accessToken string) (*AccessTokenPayload, error) {
 	rawValues, err := aws.ValidateToken(accessToken)
 	if err != nil {
@@ -77,7 +86,9 @@ func (aws *Auth) ValidateAccessToken(accessToken string) (*AccessTokenPayload, e
 	return values, nil
 }
 
-// ValidateIDToken can be call to validate a idToken.
+// ValidateIDToken accessToken is an helper to validate the IDToken
+// see https://docs.aws.amazon.com/cognito/latest/developerguide/amazon-cognito-user-pools-using-tokens-with-identity-providers.html
+// It is similar as ValidateToken but will return a real structure
 func (aws *Auth) ValidateIDToken(IDToken string) (*IDTokenPayload, error) {
 	rawValues, err := aws.ValidateToken(IDToken)
 	if err != nil {
