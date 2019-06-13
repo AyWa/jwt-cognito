@@ -1,5 +1,5 @@
-# jwt-cognito
-`jwt-cognito` is a helper package that will allow you to **validate** quickly and seamlessly jwt token created by your `aws-cognito`. A simple use case, is to protect, an api to authentificate user.
+# jwt-cognito [![codecov](https://codecov.io/gh/AyWa/jwt-cognito/branch/master/graph/badge.svg)](https://codecov.io/gh/AyWa/jwt-cognito)
+`jwt-cognito` is a helper package that will allow you to **validate** quickly and seamlessly jwt token created by [AWS cognito](https://aws.amazon.com/cognito/)
 ## Installation
 `go get github.com/AyWa/jwt-cognito/cognito`
 ## Usage and examples
