@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e +o pipefail
 
-ls
-
+# run test / coverage
 make
-mv coverage.txt ${GITHUB_WORKSPACE}/coverage.txt
+# publish
+bash <(curl -s https://codecov.io/bash)

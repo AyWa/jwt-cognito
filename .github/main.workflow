@@ -5,4 +5,5 @@ workflow "Test and Coverage" {
 
 action "go" {
   uses = "./ci"
+  secrets = ["CODECOV_TOKEN"]
 }
